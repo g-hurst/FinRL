@@ -103,19 +103,17 @@ class YahooFinanceProcessor:
             while (
                 current_tic_start_date <= end_date
             ):  # downloading daily to workaround yfinance only allowing  max 7 calendar (not trading) days of 1 min data per single download
-                try:
-                    temp_df = yf.download(
-                        tic,
-                        start=current_tic_start_date,
-                        end=current_tic_start_date + delta,
-                        interval=self.time_interval,
-                        proxy=proxy,
-                    )
-                    temp_df["tic"] = tic
+                temp_df = yf.download(
+                    tic,
+                    start=current_tic_start_date,
+                    end=current_tic_start_date + delta,
+                    interval=self.time_interval,
+                    proxy=proxy,
+                )
+                temp_df["tic"] = tic
+                # avoid future warning of concatination of empty df
+                if not temp_df.empty and temp_df.notnull().any().any() and len(temp_df) >= 1:
                     data_df = pd.concat([data_df, temp_df])
-                except Exception as e:
-                    print(f'failed to download {tic}: {current_tic_start_date}-{current_tic_start_date+delta}')
-                    print(e)
 
                 current_tic_start_date += delta
 
